@@ -284,6 +284,39 @@ class TaskGeneratorDialog(QDialog):
         else:
             return ("discrete", map(float, str(self.periods.text()).split()))
 
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
+
+class TaskCreateDialog(QDialog):
+    def __init__(self):
+        QDialog.__init__(self)
+        self.layout = QVBoxLayout(self)
+
+        # Create a group box for better organization
+        group = QGroupBox("Task Creation")
+        vbox = QVBoxLayout()
+
+        # Add a button
+        create_button = QPushButton("Create Task", self)
+        vbox.addWidget(create_button)
+
+        # Set the group box layout
+        group.setLayout(vbox)
+
+        # Add group box to main layout
+        self.layout.addWidget(group)
+
+        # Add standard dialog buttons
+        buttonBox = QDialogButtonBox()
+        cancel = buttonBox.addButton(QDialogButtonBox.Cancel)
+        ok = buttonBox.addButton(QDialogButtonBox.Ok)
+
+        # Connect the buttons
+        cancel.clicked.connect(self.reject)
+        ok.clicked.connect(self.accept)
+
+        # Add button box to layout
+        self.layout.addWidget(buttonBox)
+        
 
 if __name__ == "__main__":
     import sys

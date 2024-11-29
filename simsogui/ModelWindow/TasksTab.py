@@ -8,7 +8,7 @@ from PyQt5.QtGui import QColor
 
 from .Tab import Tab
 from .AddRemoveButtonBar import AddRemoveButtonBar
-from ..TaskGenerator import TaskGeneratorDialog
+from ..TaskGenerator import TaskGeneratorDialog, TaskCreateDialog
 from .CustomFieldsEditor import CustomFieldsEditor
 
 from simso.core import Task
@@ -62,7 +62,14 @@ class TasksTab(Tab):
     def etm_changed(self, etm):
         self._tasks_table.etm_changed(etm)
 
+    def create_task(self):
+        print('asdherghkujr')
+        generator = TaskCreateDialog()
+        if generator.exec_():
+            pass
+
     def generate(self):
+        print('asdherghkujr')
         generator = TaskGeneratorDialog(len(self.configuration.proc_info_list))
         if generator.exec_():
             self._tasks_table.remove_all_tasks()
@@ -91,6 +98,11 @@ class TasksButtonBar(AddRemoveButtonBar):
         generate = QPushButton("Generate Task Set")
         generate.clicked.connect(parent.generate)
         self.layout().addWidget(generate)
+        
+        print(type(parent))
+        createBtn = QPushButton("Create Task")
+        createBtn.clicked.connect(parent.create_task)
+        self.layout().addWidget(createBtn)
 
 
 class TasksTable(QTableWidget):
