@@ -6,6 +6,8 @@ from simso.generator.task_generator import StaffordRandFixedSum, \
     gen_periods_loguniform, gen_periods_uniform, gen_periods_discrete, \
     gen_tasksets, UUniFastDiscard, gen_kato_utilizations
 
+from PyQt5 import QtGui
+
 
 class _DoubleSlider(QSlider):
     doubleValueChanged = pyqtSignal([float])
@@ -291,21 +293,17 @@ class TaskCreateDialog(QDialog):
         QDialog.__init__(self)
         self.layout = QVBoxLayout(self)
 
+        boldFont = QtGui.QFont()
+        boldFont.setBold(True)
+        h3_title = QLabel("Create Custom Task", self)
+        h3_title.setFont(boldFont)
+        self.layout.addWidget(h3_title)
+
         self.layout.addWidget(QLabel('Enter the new task type name:', self))
         self._field_name_edit = QLineEdit(self)
         self._field_name_edit.textChanged.connect(self._text_changed)
 
         self.layout.addWidget(self._field_name_edit)
-
-        # Create a group box for better organization
-        group = QGroupBox("Task Creation")
-        vbox = QVBoxLayout()
-
-        # Set the group box layout
-        group.setLayout(vbox)
-
-        # Add group box to main layout
-        self.layout.addWidget(group)
 
         # Add standard dialog buttons
         buttonBox = QDialogButtonBox()
