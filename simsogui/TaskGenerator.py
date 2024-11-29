@@ -291,13 +291,15 @@ class TaskCreateDialog(QDialog):
         QDialog.__init__(self)
         self.layout = QVBoxLayout(self)
 
+        self.layout.addWidget(QLabel('Enter the new task type name:', self))
+        self._field_name_edit = QLineEdit(self)
+        self._field_name_edit.textChanged.connect(self._text_changed)
+
+        self.layout.addWidget(self._field_name_edit)
+
         # Create a group box for better organization
         group = QGroupBox("Task Creation")
         vbox = QVBoxLayout()
-
-        # Add a button
-        create_button = QPushButton("Create Task", self)
-        vbox.addWidget(create_button)
 
         # Set the group box layout
         group.setLayout(vbox)
@@ -316,7 +318,10 @@ class TaskCreateDialog(QDialog):
 
         # Add button box to layout
         self.layout.addWidget(buttonBox)
+
         
+    def _text_changed(self, text):
+        self.txt = self._field_name_edit.text()
 
 if __name__ == "__main__":
     import sys

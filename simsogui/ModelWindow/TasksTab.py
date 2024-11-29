@@ -12,6 +12,7 @@ from ..TaskGenerator import TaskGeneratorDialog, TaskCreateDialog
 from .CustomFieldsEditor import CustomFieldsEditor
 
 from simso.core import Task
+from simso.core.Task import appen_to_task_types_names
 from simso.generator.task_generator import gen_arrivals
 
 convert_function = {
@@ -63,13 +64,11 @@ class TasksTab(Tab):
         self._tasks_table.etm_changed(etm)
 
     def create_task(self):
-        print('asdherghkujr')
         generator = TaskCreateDialog()
         if generator.exec_():
-            pass
+            appen_to_task_types_names(generator.txt)
 
     def generate(self):
-        print('asdherghkujr')
         generator = TaskGeneratorDialog(len(self.configuration.proc_info_list))
         if generator.exec_():
             self._tasks_table.remove_all_tasks()
@@ -99,8 +98,7 @@ class TasksButtonBar(AddRemoveButtonBar):
         generate.clicked.connect(parent.generate)
         self.layout().addWidget(generate)
         
-        print(type(parent))
-        createBtn = QPushButton("Create Task")
+        createBtn = QPushButton("Create Task Type")
         createBtn.clicked.connect(parent.create_task)
         self.layout().addWidget(createBtn)
 
@@ -197,6 +195,7 @@ class TasksTable(QTableWidget):
         self.setItem(row, self._dict_header['name'],
                      QTableWidgetItem(str(task.name)))
 
+        appen_to_task_types_names('smekerie123')
         combo = QComboBox()
         items = [task_type for task_type in Task.task_types_names]
         combo.addItems(items)
@@ -265,7 +264,12 @@ class TasksTable(QTableWidget):
     def _show_period(self, task, row):
         self._ignore_cell_changed = True
 
+        print('-----------------------------------', task.task_type)    
+        if not task.task_type in Task.task_types.keys():
+            task.task_type = 'Custom'
+
         fields = Task.task_types[task.task_type].fields
+        
         for field in ['activation_date', 'list_activation_dates', 'period',
                       'deadline', 'wcet']:
             flags = self.item(row, self._dict_header[field]).flags()
