@@ -7,6 +7,7 @@ from simso.generator.task_generator import StaffordRandFixedSum, \
     gen_tasksets, UUniFastDiscard, gen_kato_utilizations
 
 from PyQt5 import QtGui
+from simsogui.Global import GlobalData
 
 
 class _DoubleSlider(QSlider):
@@ -331,6 +332,8 @@ class TaskCreateDialog(QDialog):
             self.enabled_fields.append(text)
         else:
             self.enabled_fields = list(filter(lambda e: e != text, self.enabled_fields))
+        GlobalData.enabled_fields = self.enabled_fields
+        
 
     def _text_changed(self, text):
         self.txt = self._field_name_edit.text()

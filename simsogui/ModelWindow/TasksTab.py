@@ -15,6 +15,8 @@ from simso.core import Task
 from simso.core.Task import appen_to_task_types_names
 from simso.generator.task_generator import gen_arrivals
 
+from simsogui.Global import GlobalData
+
 convert_function = {
     'int': int,
     'float': float,
@@ -267,7 +269,7 @@ class TasksTable(QTableWidget):
         print('-----------------------------------', task.task_type)    
         if not task.task_type in Task.task_types.keys():
             task.task_type = 'Custom'
-            Task.task_types[task.task_type].fields = ['wcet', 'deadline']
+            Task.task_types[task.task_type].fields = GlobalData.enabled_fields
         fields = Task.task_types[task.task_type].fields
         
         for field in ['activation_date', 'list_activation_dates', 'period',
