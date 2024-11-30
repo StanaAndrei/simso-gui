@@ -195,7 +195,7 @@ class TasksTable(QTableWidget):
         self.setItem(row, self._dict_header['name'],
                      QTableWidgetItem(str(task.name)))
 
-        appen_to_task_types_names('smekerie123')
+        # appen_to_task_types_names('smekerie123')
         combo = QComboBox()
         items = [task_type for task_type in Task.task_types_names]
         combo.addItems(items)
@@ -267,7 +267,7 @@ class TasksTable(QTableWidget):
         print('-----------------------------------', task.task_type)    
         if not task.task_type in Task.task_types.keys():
             task.task_type = 'Custom'
-
+            Task.task_types[task.task_type].fields = ['wcet', 'deadline']
         fields = Task.task_types[task.task_type].fields
         
         for field in ['activation_date', 'list_activation_dates', 'period',

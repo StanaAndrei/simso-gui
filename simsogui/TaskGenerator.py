@@ -314,10 +314,24 @@ class TaskCreateDialog(QDialog):
         cancel.clicked.connect(self.reject)
         ok.clicked.connect(self.accept)
 
+        fields = ['activation_date', 'period', 'list_activation_dates', 'deadline', 'wcet']
+        self.enabled_fields = []
+        for i in range(len(fields)):
+            checkbox = QCheckBox(fields[i], self)
+            self.layout.addWidget(checkbox)
+            checkbox.stateChanged.connect(self.checkbox_state_changed)
+
         # Add button box to layout
         self.layout.addWidget(buttonBox)
 
-        
+    def checkbox_state_changed(self, state):
+        checkbox = self.sender()
+        text = checkbox.text()
+        if state == 2:
+            self.enabled_fields.append(text)
+        else:
+            self.enabled_fields = list(filter(lambda e: e != text, self.enabled_fields))
+
     def _text_changed(self, text):
         self.txt = self._field_name_edit.text()
 
