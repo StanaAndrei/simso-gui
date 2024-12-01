@@ -131,6 +131,20 @@ class TaskGeneratorDialog(QDialog):
         self.hbox_sporadic_tasks.addWidget(self.spin_sporadic_tasks)
         vbox_utilizations.addLayout(self.hbox_sporadic_tasks)
 
+        # number of custom created task
+        self.spin_custom_tasks = {}
+        for key in GlobalData.d:
+            self.hbox_custom_tasks = QHBoxLayout()
+            self.spin_custom_tasks[key] = QSpinBox(self)
+            self.spin_custom_tasks[key].setMinimum(0)
+            self.spin_custom_tasks[key].setMaximum(999)  # That's arbitrary.
+            self.hbox_custom_tasks.addWidget(
+                QLabel(f"Number of {key} tasks: ", self))
+            self.hbox_custom_tasks.addStretch(1)
+            self.hbox_custom_tasks.addWidget(self.spin_custom_tasks[key])
+            vbox_utilizations.addLayout(self.hbox_custom_tasks)
+
+
         # Min / Max utilizations
         self.hbox_utilizations = QHBoxLayout()
         self.hbox_utilizations.addWidget(QLabel("Min/Max utilizations: ",
@@ -251,21 +265,27 @@ class TaskGeneratorDialog(QDialog):
                                        p_types[3])
         else:
             p = gen_periods_discrete(n, 1, p_types[1])
-            
+        
         if u and p:
             self.taskset = gen_tasksets(u, p)[0]
             self.accept()
         elif not u:
             QMessageBox.warning(
                 self, "Generation failed",
-                "Please check the utilization and the number of tasks.")
+                "Please check the utilization and the number of tasks!")
         else:
             QMessageBox.warning(
                 self, "Generation failed",
                 "Pleache check the periods.")
 
+    def get_nb_custom_tasks(self, name):
+        return self.spin_custom_tasks[name].value()
+
     def get_nb_tasks(self):
-        return self.spin_tasks.value() + self.spin_sporadic_tasks.value()
+        s = 0
+        for key in GlobalData.d:
+            s += self.get_nb_custom_tasks(key)
+        return self.spin_tasks.value() + self.spin_sporadic_tasks.value() + s
 
     def get_nb_periodic_tasks(self):
         return self.spin_tasks.value()

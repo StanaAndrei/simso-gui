@@ -76,20 +76,32 @@ class TasksTab(Tab):
             self._tasks_table.remove_all_tasks()
             periodic_tasks = generator.get_nb_periodic_tasks()
             i = 0
-            for ci, pi in generator.taskset:
-                i += 1
-                if i <= periodic_tasks:
+            if generator.get_nb_periodic_tasks() + generator.get_nb_sporadic_tasks() > 0:
+                for ci, pi in generator.taskset:
+                    i += 1
+                    if i <= periodic_tasks:
+                        task = self.configuration.add_task(
+                            "Task " + str(i), i, period=pi, wcet=ci, deadline=pi)
+                    else:
+                        task = self.configuration.add_task(
+                            "Task " + str(i), i, period=pi, wcet=ci, deadline=pi,
+                            task_type="Sporadic",
+                            list_activation_dates=gen_arrivals(
+                                pi, 0, self.configuration.duration_ms))
+
+                    self._tasks_table.add_task(task)
+            
+            for key in GlobalData.d:
+                value = generator.get_nb_custom_tasks(key)
+                for cnt in range(value):
+                    i += 1
                     task = self.configuration.add_task(
-                        "Task " + str(i), i, period=pi, wcet=ci, deadline=pi)
-                else:
-                    task = self.configuration.add_task(
-                        "Task " + str(i), i, period=pi, wcet=ci, deadline=pi,
-                        task_type="Sporadic",
+                        'Task ' + str(i), i, period=0.0, wcet=0.0, deadline=0.0,
+                        task_type=key,
                         list_activation_dates=gen_arrivals(
-                            pi, 0, self.configuration.duration_ms))
-
-                self._tasks_table.add_task(task)
-
+                                    100, 0, self.configuration.duration_ms)
+                    )
+                    self._tasks_table.add_task(task)
 
 class TasksButtonBar(AddRemoveButtonBar):
     def __init__(self, parent, tasks_table):
