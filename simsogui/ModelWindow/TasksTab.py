@@ -266,11 +266,11 @@ class TasksTable(QTableWidget):
     def _show_period(self, task, row):
         self._ignore_cell_changed = True
 
-        print('-----------------------------------', task.task_type)    
         if not task.task_type in Task.task_types.keys():
+            fields = GlobalData.d[task.task_type]
             task.task_type = 'Custom'
-            Task.task_types[task.task_type].fields = GlobalData.enabled_fields
-        fields = Task.task_types[task.task_type].fields
+        else:
+            fields = Task.task_types[task.task_type].fields
         
         for field in ['activation_date', 'list_activation_dates', 'period',
                       'deadline', 'wcet']:

@@ -326,6 +326,7 @@ class TaskCreateDialog(QDialog):
         self.layout.addWidget(buttonBox)
 
     def checkbox_state_changed(self, state):
+        print(self.enabled_fields)
         checkbox = self.sender()
         text = checkbox.text()
         if state == 2:
@@ -333,6 +334,7 @@ class TaskCreateDialog(QDialog):
         else:
             self.enabled_fields = list(filter(lambda e: e != text, self.enabled_fields))
         GlobalData.enabled_fields = self.enabled_fields
+        GlobalData.d[self.txt] = self.enabled_fields
         
 
     def _text_changed(self, text):
