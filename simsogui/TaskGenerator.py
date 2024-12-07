@@ -10,6 +10,9 @@ from PyQt5 import QtGui
 from simsogui.Global import GlobalData
 
 
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QFileDialog, QVBoxLayout, QWidget  
+import sys, json
+
 class _DoubleSlider(QSlider):
     doubleValueChanged = pyqtSignal([float])
 
@@ -344,6 +347,29 @@ class TaskCreateDialog(QDialog):
 
         # Add button box to layout
         self.layout.addWidget(buttonBox)
+
+        loadBtn = QPushButton("Load saved task")
+        loadBtn.clicked.connect(self.open_file_dialog)
+        self.layout.addWidget(loadBtn)
+
+    def open_file_dialog(self):  
+        # Open a file dialog and get the selected file path  
+        options = QFileDialog.Options()  
+        options |= QFileDialog.ReadOnly  # Open in read-only mode  
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select a File", "", "All Files (*);;Text Files (*.txt)", options=options)  
+
+        if file_path:  
+            # Display the selected file path in the QLineEdit  
+            print(file_path)
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+                txt = file_path
+                txt = txt[txt.rfind('/')+1:]
+                txt = txt[:txt.find('.')]
+                self.txt = txt
+                self.enabled_fields = data['fields']
+                self.accept()
+                GlobalData.d[txt] = self.enabled_fields
 
     def checkbox_state_changed(self, state):
         print(self.enabled_fields)

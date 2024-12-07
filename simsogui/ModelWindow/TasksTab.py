@@ -84,8 +84,11 @@ class TasksTab(Tab):
             self._tasks_table.remove_all_tasks()
             periodic_tasks = generator.get_nb_periodic_tasks()
             i = 0
+            print(generator.taskset)
             if generator.get_nb_periodic_tasks() + generator.get_nb_sporadic_tasks() > 0:
                 for ci, pi in generator.taskset:
+                    if i == generator.get_nb_periodic_tasks() + generator.get_nb_sporadic_tasks() :
+                        break
                     i += 1
                     if i <= periodic_tasks:
                         task = self.configuration.add_task(
