@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import re
+import re, os, json
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QPushButton, QTableWidgetItem, QTableWidget, QWidget
 from PyQt5.QtGui import QColor
@@ -69,6 +69,14 @@ class TasksTab(Tab):
         generator = TaskCreateDialog()
         if generator.exec_():
             appen_to_task_types_names(generator.txt)
+            print(f'Saved to {os.getcwd()}')
+            newTaskFileName = f'{generator.txt}.task.json'
+            fpath = os.path.join(os.getcwd(), newTaskFileName)
+            newTaskJson = {}
+            newTaskJson['fields'] = generator.enabled_fields
+            with open(fpath, "w") as f:
+                f.write(json.dumps(newTaskJson))
+                f.write('\n')
 
     def generate(self):
         generator = TaskGeneratorDialog(len(self.configuration.proc_info_list))
