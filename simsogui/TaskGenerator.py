@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtWidgets import QCheckBox, QComboBox, QDialogButtonBox, QDialog, QDoubleSpinBox, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QRadioButton, QSlider, QSpinBox, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QCheckBox, QComboBox, QTextEdit, QDialogButtonBox, QDialog, QDoubleSpinBox, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QRadioButton, QSlider, QSpinBox, QVBoxLayout, QWidget
 from PyQt5.QtCore import pyqtSignal, QRegExp
 from PyQt5 import QtCore, QtWidgets
 from simso.generator.task_generator import StaffordRandFixedSum, \
@@ -11,7 +11,7 @@ from simsogui.Global import GlobalData
 
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QFileDialog, QVBoxLayout, QWidget  
-import sys, json
+import sys, json, textwrap
 
 class _DoubleSlider(QSlider):
     doubleValueChanged = pyqtSignal([float])
@@ -315,6 +315,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout
 class TaskCreateDialog(QDialog):
     def __init__(self):
         QDialog.__init__(self)
+        self.txt = ''
         self.layout = QVBoxLayout(self)
 
         boldFont = QtGui.QFont()
@@ -345,12 +346,27 @@ class TaskCreateDialog(QDialog):
             self.layout.addWidget(checkbox)
             checkbox.stateChanged.connect(self.checkbox_state_changed)
 
+        # code zone
+
+
+        self.codeBox = QTextEdit()
+        self.codeBox.setAcceptRichText(False)
+        self.codeBox.textChanged.connect(self.on_text_changed)
+        self.codeBox.setText(textwrap.dedent(GlobalData.EXAMPLE_CODE))
+
+        self.layout.addWidget(self.codeBox)
+
         # Add button box to layout
         self.layout.addWidget(buttonBox)
 
         loadBtn = QPushButton("Load saved task")
         loadBtn.clicked.connect(self.open_file_dialog)
         self.layout.addWidget(loadBtn)
+
+    def on_text_changed(self):
+        codeTxt = self.codeBox.toPlainText()    
+        if self.txt != '':
+            GlobalData.customTaskNameToCode[self.txt] = codeTxt
 
     def open_file_dialog(self):  
         # Open a file dialog and get the selected file path  
@@ -370,6 +386,8 @@ class TaskCreateDialog(QDialog):
                 self.enabled_fields = data['fields']
                 self.accept()
                 GlobalData.d[txt] = self.enabled_fields
+                if 'code' in data:
+                    GlobalData.customTaskNameToCode[txt] = data['code']
 
     def checkbox_state_changed(self, state):
         print(self.enabled_fields)

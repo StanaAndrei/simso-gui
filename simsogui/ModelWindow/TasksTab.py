@@ -74,6 +74,7 @@ class TasksTab(Tab):
             fpath = os.path.join(os.getcwd(), newTaskFileName)
             newTaskJson = {}
             newTaskJson['fields'] = generator.enabled_fields
+            newTaskJson['code'] = GlobalData.customTaskNameToCode[generator.txt]
             with open(fpath, "w") as f:
                 f.write(json.dumps(newTaskJson))
                 f.write('\n')
@@ -223,6 +224,7 @@ class TasksTable(QTableWidget):
         # appen_to_task_types_names('smekerie123')
         combo = QComboBox()
         items = [task_type for task_type in Task.task_types_names]
+        print(items)
         combo.addItems(items)
         combo.setCurrentIndex(combo.findText(task.task_type))
         combo.currentIndexChanged.connect(
@@ -289,8 +291,10 @@ class TasksTable(QTableWidget):
     def _show_period(self, task, row):
         self._ignore_cell_changed = True
 
+        print('tip task:', type(task))
         if not task.task_type in Task.task_types.keys():
             fields = GlobalData.d[task.task_type]
+            task.custom_task_name = task.task_type
             task.task_type = 'Custom'
         else:
             fields = Task.task_types[task.task_type].fields
