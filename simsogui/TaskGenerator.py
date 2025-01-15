@@ -339,7 +339,8 @@ class TaskCreateDialog(QDialog):
         cancel.clicked.connect(self.reject)
         ok.clicked.connect(self.accept)
 
-        fields = ['activation_date', 'period', 'list_activation_dates', 'deadline', 'wcet']
+        fields = ['activation_date', 'list_activation_dates', 'period',
+                      'deadline', 'wcet', 'acet', 'et_stddev', 'base_cpi', 'n_instr', 'mix', 'sdp', 'preemption_cost']
         self.enabled_fields = []
         for i in range(len(fields)):
             checkbox = QCheckBox(fields[i], self)
@@ -397,6 +398,7 @@ class TaskCreateDialog(QDialog):
             self.enabled_fields.append(text)
         else:
             self.enabled_fields = list(filter(lambda e: e != text, self.enabled_fields))
+
         GlobalData.enabled_fields = self.enabled_fields
         GlobalData.d[self.txt] = self.enabled_fields
         

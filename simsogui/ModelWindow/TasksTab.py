@@ -74,7 +74,10 @@ class TasksTab(Tab):
             fpath = os.path.join(os.getcwd(), newTaskFileName)
             newTaskJson = {}
             newTaskJson['fields'] = generator.enabled_fields
-            newTaskJson['code'] = GlobalData.customTaskNameToCode[generator.txt]
+            if generator.txt in GlobalData.customTaskNameToCode:
+                newTaskJson['code'] = GlobalData.customTaskNameToCode[generator.txt]
+            else:
+                newTaskJson['code'] = GlobalData.EXAMPLE_CODE
             with open(fpath, "w") as f:
                 f.write(json.dumps(newTaskJson))
                 f.write('\n')
@@ -173,15 +176,15 @@ class TasksTable(QTableWidget):
         self.cellActivated.connect(self._cell_activated)
 
     def etm_changed(self, etm):
-        self.horizontalHeader().hideSection(self._dict_header['base_cpi'])
-        self.horizontalHeader().hideSection(
-            self._dict_header['n_instr'])
-        self.horizontalHeader().hideSection(self._dict_header['mix'])
-        self.horizontalHeader().hideSection(self._dict_header['sdp'])
-        self.horizontalHeader().hideSection(self._dict_header['acet'])
-        self.horizontalHeader().hideSection(self._dict_header['et_stddev'])
-        self.horizontalHeader().hideSection(
-            self._dict_header['preemption_cost'])
+        # self.horizontalHeader().hideSection(self._dict_header['base_cpi'])
+        # self.horizontalHeader().hideSection(
+        #     self._dict_header['n_instr'])
+        # self.horizontalHeader().hideSection(self._dict_header['mix'])
+        # self.horizontalHeader().hideSection(self._dict_header['sdp'])
+        # self.horizontalHeader().hideSection(self._dict_header['acet'])
+        # self.horizontalHeader().hideSection(self._dict_header['et_stddev'])
+        # self.horizontalHeader().hideSection(
+        #     self._dict_header['preemption_cost'])
 
         if etm == 'cache':
             self.horizontalHeader().showSection(self._dict_header['base_cpi'])
@@ -291,7 +294,6 @@ class TasksTable(QTableWidget):
     def _show_period(self, task, row):
         self._ignore_cell_changed = True
 
-        print('tip task:', type(task))
         if not task.task_type in Task.task_types.keys():
             fields = GlobalData.d[task.task_type]
             task.custom_task_name = task.task_type
@@ -300,7 +302,7 @@ class TasksTable(QTableWidget):
             fields = Task.task_types[task.task_type].fields
         
         for field in ['activation_date', 'list_activation_dates', 'period',
-                      'deadline', 'wcet']:
+                      'deadline', 'wcet', 'acet', 'et_stddev', 'base_cpi', 'n_instr', 'mix', 'sdp', 'preemption_cost']:
             flags = self.item(row, self._dict_header[field]).flags()
             if field in fields:
                 flags |= Qt.ItemIsEnabled
