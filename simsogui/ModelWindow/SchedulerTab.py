@@ -8,6 +8,7 @@ from .CustomFieldsEditor import CustomFieldsEditor
 from .Tab import Tab
 
 from simso.core.Scheduler import get_schedulers
+from simsogui.Global import GlobalData
 
 convert_function = {
     'int': int,
@@ -81,13 +82,14 @@ class SchedulerTable(QTableWidget):
         self._header = ['Scheduler', 'Scheduler Path',
                         'Overhead schedule (cycles)',
                         'Overhead on activate (cycles)',
-                        'Overhead on terminate (cycles)']
+                        'Overhead on terminate (cycles)', 'Heuristic type(P_EDF/P_RM)']
         self._dict_header = {
             'scheduler': 0,
             'scheduler_path': 1,
             'overhead_schedule': 2,
             'overhead_activate': 3,
-            'overhead_terminate': 4
+            'overhead_terminate': 4,
+            'heuristic': 5,
         }
         self._configuration = configuration
         self._simulation_tab = simulation_tab
@@ -155,6 +157,18 @@ class SchedulerTable(QTableWidget):
             self.setItem(i, 0, QTableWidgetItem(str(value)))
             self.setSpan(i, 0, 1, 2)
             i += 1
+
+
+        heuristicCombo = QComboBox()
+        HEURISTICS = ['decreasing_worst_fit' ,'decreasing_best_fit','decreasing_next_fit','decreasing_first_fit','first_fit',
+        'next_fit','worst_fit','best_fit']
+        heuristicCombo.addItems(HEURISTICS)
+        self.setCellWidget(5, 0, heuristicCombo)
+        GlobalData.selected_heuristic = name
+        heuristicCombo.currentIndexChanged['QString'].connect(self._select_heuristic)
+
+    def _select_heuristic(self, name):
+        GlobalData.selected_heuristic = name
 
     def _cell_activated(self, row, col):
         if row == 1 and col == 0:

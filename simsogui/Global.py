@@ -5,6 +5,7 @@ class GlobalData:
     d = {}
     name = ''
     customTaskNameToCode = {}
+    selected_heuristic = ''
 
     EXAMPLE_CODE = r'''
     def customExec(self):
