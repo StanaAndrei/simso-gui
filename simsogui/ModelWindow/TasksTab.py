@@ -1,18 +1,21 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import re
+import re, os, json
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAbstractItemView, QComboBox, QFileDialog, QHBoxLayout, QHeaderView, QPushButton, QTableWidgetItem, QTableWidget, QWidget
 from PyQt5.QtGui import QColor
 
 from .Tab import Tab
 from .AddRemoveButtonBar import AddRemoveButtonBar
-from ..TaskGenerator import TaskGeneratorDialog
+from ..TaskGenerator import TaskGeneratorDialog, TaskCreateDialog
 from .CustomFieldsEditor import CustomFieldsEditor
 
 from simso.core import Task
+from simso.core.Task import appen_to_task_types_names
 from simso.generator.task_generator import gen_arrivals
+
+from simsogui.Global import GlobalData
 
 convert_function = {
     'int': int,
@@ -62,26 +65,58 @@ class TasksTab(Tab):
     def etm_changed(self, etm):
         self._tasks_table.etm_changed(etm)
 
+    def create_task(self):
+        generator = TaskCreateDialog()
+        if generator.exec_():
+            appen_to_task_types_names(generator.txt)
+            print(f'Saved to {os.getcwd()}')
+            newTaskFileName = f'{generator.txt}.task.json'
+            fpath = os.path.join(os.getcwd(), newTaskFileName)
+            newTaskJson = {}
+            newTaskJson['fields'] = generator.enabled_fields
+            if generator.txt in GlobalData.customTaskNameToCode:
+                newTaskJson['code'] = GlobalData.customTaskNameToCode[generator.txt]
+            else:
+                newTaskJson['code'] = GlobalData.EXAMPLE_CODE
+            with open(fpath, "w") as f:
+                f.write(json.dumps(newTaskJson))
+                f.write('\n')
+
     def generate(self):
         generator = TaskGeneratorDialog(len(self.configuration.proc_info_list))
         if generator.exec_():
             self._tasks_table.remove_all_tasks()
             periodic_tasks = generator.get_nb_periodic_tasks()
             i = 0
-            for ci, pi in generator.taskset:
-                i += 1
-                if i <= periodic_tasks:
+            print(generator.taskset)
+            if generator.get_nb_periodic_tasks() + generator.get_nb_sporadic_tasks() > 0:
+                for ci, pi in generator.taskset:
+                    if i == generator.get_nb_periodic_tasks() + generator.get_nb_sporadic_tasks() :
+                        break
+                    i += 1
+                    if i <= periodic_tasks:
+                        task = self.configuration.add_task(
+                            "Task " + str(i), i, period=pi, wcet=ci, deadline=pi)
+                    else:
+                        task = self.configuration.add_task(
+                            "Task " + str(i), i, period=pi, wcet=ci, deadline=pi,
+                            task_type="Sporadic",
+                            list_activation_dates=gen_arrivals(
+                                pi, 0, self.configuration.duration_ms))
+
+                    self._tasks_table.add_task(task)
+            
+            for key in GlobalData.d:
+                value = generator.get_nb_custom_tasks(key)
+                for cnt in range(value):
+                    i += 1
                     task = self.configuration.add_task(
-                        "Task " + str(i), i, period=pi, wcet=ci, deadline=pi)
-                else:
-                    task = self.configuration.add_task(
-                        "Task " + str(i), i, period=pi, wcet=ci, deadline=pi,
-                        task_type="Sporadic",
+                        'Task ' + str(i), i, period=0.0, wcet=0.0, deadline=0.0,
+                        task_type=key,
                         list_activation_dates=gen_arrivals(
-                            pi, 0, self.configuration.duration_ms))
-
-                self._tasks_table.add_task(task)
-
+                                    100, 0, self.configuration.duration_ms)
+                    )
+                    self._tasks_table.add_task(task)
 
 class TasksButtonBar(AddRemoveButtonBar):
     def __init__(self, parent, tasks_table):
@@ -91,6 +126,10 @@ class TasksButtonBar(AddRemoveButtonBar):
         generate = QPushButton("Generate Task Set")
         generate.clicked.connect(parent.generate)
         self.layout().addWidget(generate)
+        
+        createBtn = QPushButton("Create Task Type")
+        createBtn.clicked.connect(parent.create_task)
+        self.layout().addWidget(createBtn)
 
 
 class TasksTable(QTableWidget):
@@ -137,15 +176,15 @@ class TasksTable(QTableWidget):
         self.cellActivated.connect(self._cell_activated)
 
     def etm_changed(self, etm):
-        self.horizontalHeader().hideSection(self._dict_header['base_cpi'])
-        self.horizontalHeader().hideSection(
-            self._dict_header['n_instr'])
-        self.horizontalHeader().hideSection(self._dict_header['mix'])
-        self.horizontalHeader().hideSection(self._dict_header['sdp'])
-        self.horizontalHeader().hideSection(self._dict_header['acet'])
-        self.horizontalHeader().hideSection(self._dict_header['et_stddev'])
-        self.horizontalHeader().hideSection(
-            self._dict_header['preemption_cost'])
+        # self.horizontalHeader().hideSection(self._dict_header['base_cpi'])
+        # self.horizontalHeader().hideSection(
+        #     self._dict_header['n_instr'])
+        # self.horizontalHeader().hideSection(self._dict_header['mix'])
+        # self.horizontalHeader().hideSection(self._dict_header['sdp'])
+        # self.horizontalHeader().hideSection(self._dict_header['acet'])
+        # self.horizontalHeader().hideSection(self._dict_header['et_stddev'])
+        # self.horizontalHeader().hideSection(
+        #     self._dict_header['preemption_cost'])
 
         if etm == 'cache':
             self.horizontalHeader().showSection(self._dict_header['base_cpi'])
@@ -185,8 +224,10 @@ class TasksTable(QTableWidget):
         self.setItem(row, self._dict_header['name'],
                      QTableWidgetItem(str(task.name)))
 
+        # appen_to_task_types_names('smekerie123')
         combo = QComboBox()
         items = [task_type for task_type in Task.task_types_names]
+        print(items)
         combo.addItems(items)
         combo.setCurrentIndex(combo.findText(task.task_type))
         combo.currentIndexChanged.connect(
@@ -253,9 +294,15 @@ class TasksTable(QTableWidget):
     def _show_period(self, task, row):
         self._ignore_cell_changed = True
 
-        fields = Task.task_types[task.task_type].fields
+        if not task.task_type in Task.task_types.keys():
+            fields = GlobalData.d[task.task_type]
+            task.custom_task_name = task.task_type
+            task.task_type = 'Custom'
+        else:
+            fields = Task.task_types[task.task_type].fields
+        
         for field in ['activation_date', 'list_activation_dates', 'period',
-                      'deadline', 'wcet']:
+                      'deadline', 'wcet', 'acet', 'et_stddev', 'base_cpi', 'n_instr', 'mix', 'sdp', 'preemption_cost']:
             flags = self.item(row, self._dict_header[field]).flags()
             if field in fields:
                 flags |= Qt.ItemIsEnabled
