@@ -19,3 +19,5 @@ Added the posibility to generate random sets of the newly created task types.
 Added a dropdown menu with which you can select the heurisitc you want to use with a P_EDF or P_RM schedulers in the scheduler tab at runtime.<br>
 You can choose from: decreasing_worst_fit, decreasing_best_fit, decreasing_next_fit, decreasing_first_fit, first_fit, next_fit, worst_fit, best_fit <br>
 ![image](https://github.com/user-attachments/assets/97e28d4d-6e16-4889-b7ff-258bcce8a1e9)
+
+To setup this locally follow [this tutorial](https://youtu.be/lAYVX5WsBMU).
